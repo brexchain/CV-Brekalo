@@ -1,0 +1,1482 @@
+<!DOCTYPE html>
+<html lang="de">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Scrolling CV Story – Petar Brekalo</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+      :root {
+        --bg: #050816;
+        --accent: #ffcc33;
+        --accent-soft: #ffe899;
+        --text: #f5f5f5;
+        --muted: #a9b0c6;
+        --card-bg: rgba(12, 19, 38, 0.9);
+        --card-border: rgba(255, 255, 255, 0.05);
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+        background: radial-gradient(circle at top, #101735 0, #050816 55%);
+        color: var(--text);
+        min-height: 100vh;
+        overflow-x: hidden;
+        scroll-behavior: smooth;
+        transition: all 0.3s ease;
+      }
+
+      body.view-desktop {
+        font-size: 16px;
+      }
+
+      body.view-mobile {
+        font-size: 14px;
+      }
+
+      body.mission-expired {
+        background: #ffffff !important;
+        color: #000000;
+      }
+
+      /* Intro-Screen */
+
+      #intro-screen {
+        position: fixed;
+        inset: 0;
+        background: radial-gradient(circle at top, #101735 0, #050816 55%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 200;
+        transition: opacity 0.6s ease;
+      }
+
+      #intro-screen.hidden {
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      .intro-box {
+        text-align: center;
+        padding: 24px 32px;
+        border-radius: 18px;
+        background: rgba(5, 8, 22, 0.9);
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        box-shadow: 0 18px 40px rgba(0, 0, 0, 0.7);
+      }
+
+      .intro-title {
+        font-size: 1rem;
+        margin-bottom: 8px;
+        color: var(--accent-soft);
+      }
+
+      .intro-text {
+        font-size: 0.92rem;
+        margin-bottom: 10px;
+        color: var(--muted);
+      }
+
+      .intro-hint {
+        margin-top: 10px;
+        font-size: 0.8rem;
+        color: var(--muted);
+      }
+
+      #intro-button {
+        margin-top: 10px;
+        border-radius: 999px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        background: rgba(255, 204, 51, 0.15);
+        color: var(--accent-soft);
+        padding: 8px 16px;
+        font-size: 0.85rem;
+        cursor: pointer;
+      }
+
+      #intro-button:hover {
+        background: rgba(255, 204, 51, 0.25);
+      }
+
+      /* Themes */
+
+      body.theme-story {
+        --bg: #050816;
+        --accent: #ffcc33;
+        --accent-soft: #ffe899;
+        background: radial-gradient(circle at top, #101735 0, #050816 55%);
+      }
+
+      body.theme-coffee {
+        --bg: #2b1a12;
+        --accent: #d7a86e;
+        --accent-soft: #f2c99c;
+        background: radial-gradient(circle at top, #3e2416 0, #1a0f0a 55%);
+      }
+
+      body.theme-tesla {
+        --bg: #020712;
+        --accent: #00ffe7;
+        --accent-soft: #7ffbf0;
+        background: radial-gradient(circle at top, #071b2f 0, #020712 55%);
+      }
+
+      .page-shell {
+        max-width: 960px;
+        margin: 0 auto;
+        padding: 24px 16px 80px;
+      }
+
+      header {
+        position: sticky;
+        top: 0;
+        z-index: 50;
+        backdrop-filter: blur(12px);
+        background: linear-gradient(
+          to bottom,
+          rgba(5, 8, 22, 0.95),
+          rgba(5, 8, 22, 0.75),
+          transparent
+        );
+        padding-bottom: 16px;
+        margin-bottom: 16px;
+      }
+
+      .top-bar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+      }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .brand-logo {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: radial-gradient(circle at 30% 20%, #ffe899, #ff6b6b);
+        box-shadow: 0 0 12px rgba(255, 204, 51, 0.7);
+        position: relative;
+      }
+
+      .brand-text {
+        font-weight: 600;
+        letter-spacing: 0.04em;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        color: var(--muted);
+      }
+
+      body.theme-story .brand-text::after {
+        content: " · Classified dossier";
+        font-weight: 400;
+        color: var(--accent-soft);
+      }
+
+      body.theme-coffee .brand-logo {
+        background: radial-gradient(circle at 30% 20%, #f2c99c, #8b5a2b);
+        box-shadow: 0 0 14px rgba(215, 168, 110, 0.9);
+      }
+
+      body.theme-coffee .brand-logo::after {
+        content: "☕";
+        position: relative;
+        display: block;
+        text-align: center;
+        font-size: 1.1rem;
+        line-height: 32px;
+      }
+
+      body.theme-coffee .brand-text::after {
+        content: " · Coffee mode";
+        font-weight: 400;
+        color: var(--accent-soft);
+      }
+
+      body.theme-tesla .brand-text::after {
+        content: " · Tesla mode ⚡";
+        font-weight: 400;
+        color: var(--accent-soft);
+      }
+
+      body.theme-tesla .step-card,
+      body.theme-tesla .tile-card {
+        border-color: rgba(0, 255, 231, 0.6);
+        box-shadow: 0 0 18px rgba(0, 255, 231, 0.35);
+      }
+
+      body.theme-tesla .step-card::before,
+      body.theme-tesla .tile-card::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        border-radius: inherit;
+        border: 1px dashed rgba(0, 255, 231, 0.4);
+        pointer-events: none;
+      }
+
+      .controls {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+      }
+
+      button {
+        border-radius: 999px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        background: rgba(15, 23, 42, 0.9);
+        color: var(--text);
+        padding: 6px 10px;
+        font-size: 0.8rem;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        transition: all 0.18s ease;
+        white-space: nowrap;
+      }
+
+      button span.icon {
+        font-size: 0.9rem;
+      }
+
+      button.active {
+        background: linear-gradient(135deg, #ffcc33, #ff8c42);
+        color: #1a1a1a;
+        border-color: transparent;
+        box-shadow: 0 0 16px rgba(255, 204, 51, 0.6);
+      }
+
+      button:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 6px 14px rgba(0, 0, 0, 0.35);
+      }
+
+      .subtitle {
+        margin-top: 10px;
+        font-size: 0.85rem;
+        color: var(--muted);
+      }
+
+      .mission-timer {
+        margin-top: 10px;
+        padding: 8px 12px;
+        border-radius: 999px;
+        background: rgba(255, 204, 51, 0.08);
+        border: 1px dashed rgba(255, 204, 51, 0.6);
+        font-size: 0.8rem;
+        color: var(--accent-soft);
+        display: inline-block;
+      }
+
+      main {
+        margin-top: 8px;
+      }
+
+      .timeline {
+        position: relative;
+        padding-left: 32px;
+        margin-top: 24px;
+      }
+
+      .timeline::before {
+        content: "";
+        position: absolute;
+        left: 7px;
+        top: 0;
+        bottom: 0;
+        width: 2px;
+        background: linear-gradient(
+          to bottom,
+          rgba(255, 204, 51, 0.6),
+          rgba(79, 209, 197, 0.4)
+        );
+        opacity: 0.7;
+      }
+
+      .story-step {
+        position: relative;
+        margin-bottom: 32px;
+        opacity: 0;
+        transform: translateY(30px);
+        transition: all 0.5s ease;
+      }
+
+      .story-step.show {
+        opacity: 1;
+        transform: translateY(0);
+      }
+
+      .step-dot {
+        position: absolute;
+        left: -3px;
+        top: 14px;
+        width: 14px;
+        height: 14px;
+        border-radius: 50%;
+        background: radial-gradient(circle at 30% 30%, #ffe899, #ff6b6b);
+        box-shadow: 0 0 12px rgba(255, 204, 51, 0.9);
+      }
+
+      .step-card {
+        position: relative;
+        margin-left: 32px;
+        padding: 16px 20px 14px;
+        border-radius: 16px;
+        background: var(--card-bg);
+        border: 1px solid var(--card-border);
+        box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6);
+        backdrop-filter: blur(10px);
+      }
+
+      .step-tag {
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        color: var(--accent-soft);
+        margin-bottom: 6px;
+      }
+
+      .step-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin-bottom: 6px;
+      }
+
+      .step-text {
+        font-size: 0.95rem;
+        margin-bottom: 10px;
+        color: var(--muted);
+      }
+
+      .bullets {
+        list-style: none;
+        padding-left: 0;
+      }
+
+      .bullets li {
+        font-size: 0.9rem;
+        margin-bottom: 4px;
+        display: flex;
+        align-items: flex-start;
+        gap: 6px;
+        opacity: 0;
+        transform: translateY(10px);
+        animation: bullet-in 0.4s ease forwards;
+      }
+
+      .bullets li::before {
+        content: "•";
+        color: var(--accent);
+        margin-top: 1px;
+        flex-shrink: 0;
+      }
+
+      .story-step.show .bullets li {
+        animation-delay: calc(0.1s * var(--i));
+      }
+
+      @keyframes bullet-in {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .lang-label {
+        font-size: 0.75rem;
+        color: var(--muted);
+      }
+
+      #tiles-view {
+        margin-top: 24px;
+        display: none;
+      }
+
+      .tiles-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 16px;
+      }
+
+      .tile-card {
+        position: relative;
+        border-radius: 18px;
+        background: linear-gradient(
+          145deg,
+          rgba(12, 19, 38, 0.95),
+          rgba(24, 32, 64, 0.95)
+        );
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        padding: 16px 14px 10px;
+        box-shadow: 0 12px 28px rgba(0, 0, 0, 0.5);
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        cursor: pointer;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+      }
+
+      .tile-card:hover {
+        transform: translateY(-3px) scale(1.02);
+        box-shadow: 0 18px 32px rgba(0, 0, 0, 0.6);
+      }
+
+      .tile-icon {
+        font-size: 1.9rem;
+      }
+
+      .tile-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+      }
+
+      .tile-title {
+        font-size: 0.98rem;
+        font-weight: 600;
+      }
+
+      .tile-tag {
+        font-size: 0.7rem;
+        color: var(--accent-soft);
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+      }
+
+      .tile-lead {
+        font-size: 0.85rem;
+        color: var(--accent-soft);
+      }
+
+      .tile-details {
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.25s ease, opacity 0.25s ease;
+        opacity: 0;
+      }
+
+      .tile-card.open .tile-details {
+        max-height: 200px;
+        opacity: 1;
+      }
+
+      .tile-bullets {
+        list-style: none;
+        margin-top: 4px;
+        padding-left: 0;
+      }
+
+      .tile-bullets li {
+        font-size: 0.82rem;
+        color: var(--muted);
+        margin-bottom: 3px;
+      }
+
+      .view-note {
+        font-size: 0.8rem;
+        color: var(--muted);
+        margin-bottom: 10px;
+      }
+
+      #tesla-lab {
+        margin-top: 32px;
+        display: none;
+      }
+
+      #tesla-lab .tile-card {
+        cursor: pointer;
+      }
+
+      .project-link {
+        font-size: 0.8rem;
+        color: var(--accent-soft);
+        margin-top: 4px;
+        text-decoration: underline;
+        word-break: break-all;
+      }
+
+      @media (max-width: 720px) {
+        .page-shell {
+          padding: 16px 12px 60px;
+        }
+
+        header {
+          padding-bottom: 10px;
+        }
+
+        .timeline {
+          padding-left: 26px;
+        }
+
+        .step-card {
+          margin-left: 26px;
+          padding: 14px 14px 12px;
+        }
+
+        .step-title {
+          font-size: 1rem;
+        }
+
+        .tiles-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      body.view-mobile .page-shell {
+        max-width: 480px;
+      }
+    </style>
+  </head>
+  <body class="view-desktop theme-story">
+    <div id="intro-screen">
+      <div class="intro-box">
+        <div class="intro-title">
+          Diese Bewerbung ist eine zeitlich begrenzte Mission.
+        </div>
+        <div class="intro-text">
+          Selbstzerstörung in:
+          <span id="intro-countdown">3 Tage, 0 Stunden, 0 Minuten</span>
+        </div>
+        <button id="intro-button">
+          ▶ Click here to open the dossier
+        </button>
+        <div class="intro-hint">
+          Oder kurz warten, das Dossier öffnet sich automatisch.
+        </div>
+      </div>
+    </div>
+
+    <div class="page-shell" id="main-shell">
+      <header>
+        <div class="top-bar">
+          <div class="brand">
+            <div class="brand-logo"></div>
+            <div>
+              <div class="brand-text">Scrolling CV Story · Petar Brekalo</div>
+              <div class="lang-label" id="current-label">
+                DE · playful career timeline
+              </div>
+            </div>
+          </div>
+          <div class="controls">
+            <button id="lang-toggle" class="active">
+              <span class="icon" id="lang-flag">🇩🇪</span>
+              <span id="lang-toggle-text">Deutsch</span>
+            </button>
+            <button id="view-toggle">
+              <span class="icon">🖥️</span>
+              <span id="view-toggle-text">Desktop view</span>
+            </button>
+            <button id="mode-toggle">
+              <span class="icon">⚡</span>
+              <span id="mode-toggle-text">Kurzmodus</span>
+            </button>
+            <button id="theme-story" class="active">
+              <span class="icon">🎬</span><span>Story</span>
+            </button>
+            <button id="theme-coffee">
+              <span class="icon">☕</span><span>Coffee</span>
+            </button>
+            <button id="theme-tesla">
+              <span class="icon">⚡</span><span>Tesla</span>
+            </button>
+          </div>
+        </div>
+        <p class="subtitle" id="subtitle">
+          Scroll nach unten und erlebe den Lebenslauf als kleine Story.
+        </p>
+        <p class="subtitle" id="mission-intro">
+          Recruiter, Ihre Mission – sollten Sie sie annehmen – besteht darin,
+          diesen Lebenslauf rechtzeitig zu dekodieren.
+        </p>
+
+        <div id="mission-timer" class="mission-timer">
+          <span id="mission-text-de">
+            Diese Bewerbung ist eine zeitlich begrenzte Mission.<br />
+            Selbstzerstörung in:
+            <span id="countdown-de"></span>
+          </span>
+          <span id="mission-text-en" style="display: none;">
+            This application is a limited-time mission.<br />
+            Self-destruct in:
+            <span id="countdown-en"></span>
+          </span>
+        </div>
+      </header>
+
+      <main>
+        <section class="timeline" id="timeline"></section>
+
+        <section id="tiles-view">
+          <p class="view-note" id="tiles-note">
+            Kurzmodus: 8 Kacheln mit den wichtigsten Missionen. Wenn Sie das
+            komplette Dossier sehen wollen, bleiben Sie im Storymodus.
+          </p>
+          <div class="tiles-grid" id="tiles-grid"></div>
+        </section>
+
+        <section id="tesla-lab">
+          <p class="view-note" id="tesla-lab-note">
+            Tesla Mode: Laborprotokoll – eine Auswahl meiner Web-Experimente.
+          </p>
+          <div class="tiles-grid" id="tesla-lab-grid"></div>
+        </section>
+      </main>
+    </div>
+
+    <script>
+      const content = {
+        de: {
+          subtitleStory:
+            "Scroll nach unten und erlebe den Lebenslauf als geheime Mission.",
+          subtitleCoffee:
+            "Coffee Mode: Lebenslauf lesen wie im Lieblingscafé.",
+          subtitleTesla:
+            "Tesla Mode: High Voltage Career Story – bitte anschnallen.",
+          missionIntro:
+            "Recruiter, Ihre Mission – sollten Sie sie annehmen – besteht darin, diesen Lebenslauf rechtzeitig zu dekodieren.",
+          label: "DE · playful career timeline",
+          tilesNote:
+            "Kurzmodus: 8 Kacheln mit den wichtigsten Missionen. Wenn Sie das komplette Dossier sehen wollen, bleiben Sie im Storymodus.",
+          tiles: [
+            {
+              icon: "🎓",
+              tag: "Level 1",
+              title: "Origin Story & Training",
+              lead:
+                "Aktenlage: solide Ausbildung für Finanz- und Audit-Missionen.",
+              details: [
+                "Pflichtschule & Gymnasium in Kroatien – Basis-Skills.",
+                "WU Wien, Schwerpunkt Revision & Steuerlehre.",
+                "ERASMUS in Budapest – internationales Setup.",
+              ],
+            },
+            {
+              icon: "📚",
+              tag: "Level 2",
+              title: "Tax, AIESEC & Nebenmissionen",
+              lead:
+                "Tagsüber Steuern und Accounting, abends Studierendenorganisation – perfektes Multitasking-Training.",
+              details: [
+                "KPMG-Praktikum in der Steuerlehre in Wien.",
+                "AIESEC-Projektleiter & Vorstandsmitglied, u.a. CFO für Budget & Buchhaltung.",
+                "Frühe Verantwortung für Geldflüsse, Berichte und Organisation.",
+              ],
+            },
+            {
+              icon: "📊",
+              tag: "Level 3",
+              title: "Audit Dungeon & EU-Bossfights",
+              lead:
+                "Big4-Audits und EU-Einsätze mit hoher Relevanz und Verantwortung.",
+              details: [
+                "PwC Wien: Legal Audits nach UGB und US-GAAP.",
+                "EUROSTAT Luxemburg: interne Audits zu Kontrollen, Risiken und Prozessen.",
+                "Brüssel-Seminare zu Internal Audit, Governance und Kontrollsystemen.",
+              ],
+            },
+            {
+              icon: "💼",
+              tag: "Level 4",
+              title: "Wealth, Immobilien & Deals",
+              lead:
+                "Frontlinie mit Kund:innen – finanzielle Entscheidungen im echten Leben.",
+              details: [
+                "Vermögensberater bei SwissLife Select / AWD in Wien.",
+                "Kreditvermittlung, Versicherungen, langfristige Finanzplanung.",
+                "Immobilienmakler bei RE/MAX HIT & EPI Immobilien Treuhand.",
+              ],
+            },
+            {
+              icon: "🏦",
+              tag: "Level 5",
+              title: "Bank by Day, Capoeira by Night",
+              lead:
+                "Banking im Anzug, Capoeira in der Roda – Kopf und Körper im Gleichgewicht.",
+              details: [
+                "UniCredit Bank Austria: Betreuung internationaler Privatkund:innen.",
+                "Beratung in mehreren Sprachen, Fokus auf Vertrauen und Struktur.",
+                "Capoeira-Trainer: Disziplin, Teambuilding und Resilienz im echten Leben.",
+              ],
+            },
+            {
+              icon: "🇪🇺",
+              tag: "Level 6",
+              title: "EU-Level: Control & Risk Radar",
+              lead:
+                "Interne Kontrollen und Risiken unter der Lupe der EU-Institutionen.",
+              details: [
+                "Auditor bei der Europäischen Kommission, EUROSTAT, Luxemburg.",
+                "Mitglied eines 5-köpfigen Internal-Audit-Teams.",
+                "Audits zu Compliance, Operation und Regulierung (z.B. Agrar, IT, Dokumentenmanagement).",
+              ],
+            },
+            {
+              icon: "🥕",
+              tag: "Level 7",
+              title: "Bio-Gemüse & Blockchain",
+              lead:
+                "Vom Feld bis zur Blockchain – bewusster Schritt raus aus der Komfortzone.",
+              details: [
+                "Assistenz der Geschäftsführung bei Bio Gemüse Posch (AT/ES).",
+                "Aufbau eines internationalen Netzwerks für biozertifizierte Produkte.",
+                "Startup-Investor, Projektmitbegründer und Berater im FinTech-/Blockchain-Bereich.",
+              ],
+            },
+            {
+              icon: "🧠",
+              tag: "Level 8",
+              title: "Crypto Pain & AI Brain",
+              lead:
+                "Lernen aus Volatilität, Fokus auf nachhaltige Missionen und neue Tools.",
+              details: [
+                "Erfahrung mit volatilen Märkten und gescheiterten Versprechen – Fokus jetzt auf Stabilität und Wert.",
+                "Neuorientierung nach Covid, Teilnahme bei Job-Trans-Fair in Wien.",
+                "Aktuell: AI-Tools, Kreativ-Prototypen und die Suche nach der nächsten sinnvollen Mission.",
+              ],
+            },
+          ],
+          projects: [
+            {
+              titleDe: "Le Chansonnier – global",
+              titleEn: "Le Chansonnier – global",
+              url: "https://le-chansonnier-global.vercel.app/",
+            },
+            {
+              titleDe: "Jam-Pa",
+              titleEn: "Jam-Pa",
+              url: "https://jam-pa.vercel.app/",
+            },
+            {
+              titleDe: "Brauhof Max",
+              titleEn: "Brauhof Max",
+              url: "https://brauhof-max.vercel.app/",
+            },
+            {
+              titleDe: "Onepager Nine",
+              titleEn: "Onepager Nine",
+              url: "https://onepager-nine.vercel.app/",
+            },
+            {
+              titleDe: "Coffeewerk",
+              titleEn: "Coffeewerk",
+              url: "https://coffeewerk.vercel.app/",
+            },
+          ],
+          steps: [
+            {
+              tag: "Kapitel 1 · Ursprung",
+              title: "Aktenzeichen: BREKALO",
+              textStory:
+                "Ich wurde vor langer Zeit in Kroatien geboren – weit weg von Excel und Audits.",
+              textCoffee:
+                "Geboren in Kroatien, lange bevor Excel und PowerPoint mein Leben gekreuzt haben.",
+              textTesla:
+                "Initial Commit: Kroatien, 1977. Kein Laptop, kein WLAN, nur Neugier auf die Welt.",
+              bullets: [
+                "Name: Mag. Petar Brekalo",
+                "Geboren am 30.12.1977 in Kroatien",
+                "Nationalität: Kroatisch",
+              ],
+            },
+            {
+              tag: "Kapitel 2 · Schule",
+              title: "Mission: Grundlagen",
+              textStory:
+                "Viele Klassenzimmer, viele Lehrer – Mission: Basiswissen aufbauen.",
+              textCoffee:
+                "Schule in Kroatien: viel Kreide, wenig Hightech, aber eine gute Basis für alles danach.",
+              textTesla:
+                "Grundrauschen: 80er/90er Schulsystem in Kroatien. Kein fancy Curriculum, aber solide Basis-CPU installiert.",
+              bullets: [
+                "1983–1992: Pflichtschule in Kroatien",
+                "1992–1996: Allgemeines Gymnasium in Kroatien",
+              ],
+            },
+            {
+              tag: "Kapitel 2 · Studium",
+              title: "Upgrade: Wirtschaft",
+              textStory:
+                "Upgrade auf Universitätslevel – Schwerpunkt: Zahlen entschlüsseln.",
+              textCoffee:
+                "In Wien habe ich gelernt, wie man Zahlen nicht nur anschaut, sondern wirklich versteht.",
+              textTesla:
+                "WU Wien als Mainframe: Fokus auf Audit & Tax – viel Theorie, aber gutes Grundframework für spätere Real-Life-Bugs.",
+              bullets: [
+                "1997–2003: Wirtschaftsuniversität Wien, Fachrichtung Revision und Steuerlehre",
+                "2002: ERASMUS, Budapest University of Economics and Public Administration",
+              ],
+            },
+            {
+              tag: "Kapitel 2 · Zusätzliche Skills",
+              title: "Lizenzen & Fortbildungen",
+              textStory:
+                "Nebenmissionen: Lizenzen und Seminare zur Stärkung des Toolkits.",
+              textCoffee:
+                "Nebenbei gab’s Lizenzen und Seminare – sozusagen Upgrades für den Werkzeugkoffer.",
+              textTesla:
+                "Side-Quests: Finanzberater-Lizenz und EU-Seminare. Im Prinzip Zusatzmodule für Governance, Risk & Control.",
+              bullets: [
+                "2004–2007: Staatlich geprüfter Vermögensberater – Gewerbeschein",
+                "2014–2015: Internal Audit Seminare der Europäischen Kommission in Brüssel",
+              ],
+            },
+            {
+              tag: "Kapitel 3 · Erste Praxis",
+              title: "Trading-Abenteuer",
+              textStory:
+                "Erste Feldmission im Ausland – direkt in der Trading-Abteilung.",
+              textCoffee:
+                "Erstes Praktikum im Ausland, direkt im Trading – viel Bildschirm, viele Zahlen, viel Neues.",
+              textTesla:
+                "Trading-Praktikum in Athen: erste Exposure zu Märkten, Zinsen und Kursbewegungen – sozusagen mein Einstieg in Live-Datenströme.",
+              bullets: [
+                "2000: Auslandspraktikum, Commercial Bank of Greece, Athen",
+                "Research und Analyse von Anleihen und Zinsen",
+              ],
+            },
+            {
+              tag: "Kapitel 3 · Big4-Level",
+              title: "Operation Audit Dungeon",
+              textStory:
+                "Einsatz bei PwC Wien – Auftrag: Bilanzen enttarnen und Risiken sichtbar machen.",
+              textCoffee:
+                "Bei PwC habe ich gelernt, wie man sich durch dicke Jahresabschlüsse kämpft und trotzdem den Überblick behält.",
+              textTesla:
+                "PwC war im Kern ein Hardcore-Debugging von Finanz-Stacks: Bilanz, GuV, Notes – plus jede Menge Edge-Cases in großen Organisationen.",
+              bullets: [
+                "2001–2004: Revision, PricewaterhouseCoopers GmbH, Wien",
+                "Externe Legal Audits nach UGB und US-GAAP",
+                "Großkunden aus Auto-, Ernährungs- und Metallindustrie",
+              ],
+            },
+            {
+              tag: "Kapitel 3 · Steuer & Verein",
+              title: "Doppelleben: Tax & AIESEC",
+              textStory:
+                "Tagsüber Steuern, abends Studierendenverein – perfektes Multitasking-Training.",
+              textCoffee:
+                "Tagsüber Steuerpraktikum, abends AIESEC – viel Arbeit, aber noch mehr Lernmomente.",
+              textTesla:
+                "KPMG + AIESEC war im Prinzip: Tagesjob im Tax-Code, Abendjob im Organisations-OS. Budget, Buchhaltung, Payments – alles einmal in echt durchgespielt.",
+              bullets: [
+                "2001: Praktikum Steuerlehre, KPMG, Wien",
+                "1997–2002: AIESEC Wien & AIESEC International, Projektleiter und Vorstandsmitglied",
+                "CFO 2000: Budget, Buchhaltung, Zahlungsverkehr",
+              ],
+            },
+            {
+              tag: "Kapitel 3 · Beratung & Immobilien",
+              title: "Vermögen & Wohnungen",
+              textStory:
+                "Direkt an der Front: Beratung, Kredite, Immobilien – echte Entscheidungen mit echten Menschen.",
+              textCoffee:
+                "Finanzberatung und Immobilien in Wien – viele Gespräche, viele Entscheidungen, viel Verantwortung direkt beim Kunden.",
+              textTesla:
+                "Frontline-Experience: Finanz-Setup für Privatkund:innen, Kreditstrukturen, Immobilien-Deals. Weniger PowerPoint, mehr echte Unterschriften und Konsequenzen.",
+              bullets: [
+                "2004–2009: Vermögensberater, SwissLife Select / AWD, Wien",
+                "Kundenakquise, Finanzberatung, Kreditvermittlung, Versicherungen",
+                "2007–2009: Immobilienmakler, RE/MAX HIT & EPI Immobilien Treuhand, Wien",
+              ],
+            },
+            {
+              tag: "Kapitel 3 · Bank & Capoeira",
+              title: "Bank am Tag, Capoeira bei Nacht",
+              textStory:
+                "Finanzprodukte am Schreibtisch, Capoeira auf der Matte – eine Phase, in der Struktur und Bewegung perfekt zusammengepasst haben.",
+              textCoffee:
+                "Tagsüber Anzug und Bank, abends Barfuß und Capoeira – gutes Training, um mit Druck umzugehen und trotzdem gelassen zu bleiben.",
+              textTesla:
+                "Tagsüber Relationship-Management im Bank-Stack (Produkte, Regulatorik, Kundenprozesse), abends Hard-Reset im Capoeira-Dojo: Fokus, Körpersprache, Teamdynamik. Gute Kombination, um mit komplexen Setups und menschlichen Interfaces klarzukommen.",
+              bullets: [
+                "2011–2013: Kundenbetreuer International Private Customers, UniCredit Bank Austria, Wien",
+                "Beratung internationaler Kund:innen in mehreren Sprachen",
+                "2008–2013: Capoeira-Kursleiter, u.a. Universität Wien – Sportinstitut, Familienbund, Youvivo",
+              ],
+            },
+            {
+              tag: "Kapitel 3 · EU-Level",
+              title: "Geheimauftrag EUROSTAT",
+              textStory:
+                "Interne Audits im statistischen Amt der EU – interne Kontrollen und Risiken im Fokus.",
+              textCoffee:
+                "Bei EUROSTAT habe ich sozusagen hinter die Kulissen der EU geschaut: Wie laufen Kontrollen, wo stecken Risiken, was funktioniert in der Praxis – und was eher nur auf Papier.",
+              textTesla:
+                "EUROSTAT war im Prinzip ein Audit-Lab: Prozesse, Kontrollsysteme und Risiken im Produktivbetrieb. Wenig Glamour, aber sehr viel Real-Life-Edge-Cases und Governance-Experience.",
+              bullets: [
+                "2013–2015: Wirtschaftsprüfer, EU-Kommission – EUROSTAT, Luxemburg",
+                "Mitglied eines 5-köpfigen Internal Audit Teams",
+                "Audits zu Compliance, Operational und Regulatory Themen (z.B. Agrikultur, IT, Dokumentenmanagement)",
+              ],
+            },
+            {
+              tag: "Kapitel 3 · Bio & Startups",
+              title: "Bio-Gemüse & Blockchain",
+              textStory:
+                "Von Bio-Lebensmitteln bis Blockchain – bewusster Schritt raus aus der Komfortzone.",
+              textCoffee:
+                "Tagsüber Bio-Gemüse und Produzenten, abends Blockchain und Startups – klingt schräg, hat mir aber gezeigt, wie ähnlich sich Märkte, Menschen und Hypes am Ende sind.",
+              textTesla:
+                "Kontext-Switch von physischen Supply Chains (Bio-Gemüse, Zertifizierungen, Produzenten-Netzwerke) zu hochvolatilen digitalen Assets (Blockchain/Startups). Viele Promises, wenig garantierter Cashflow – dafür ein massiver Zuwachs an Pattern-Recognition.",
+              bullets: [
+                "2016–2019: Assistenz der Geschäftsführung, Bio Gemüse Posch (AT/ES)",
+                "Vernetzung von Produzenten in Österreich und Spanien, Fokus auf biozertifizierte Lebensmittel",
+                "2016–2020: Startup-Investor, Projektmitbegründer und Berater im FinTech-Bereich",
+              ],
+            },
+            {
+              tag: "Kapitel 3 · Übergänge",
+              title: "Reset & Neuorientierung",
+              textStory:
+                "Nicht jede Phase ist ein Vollzeitjob – manche sind ein bewusster Reset.",
+              textCoffee:
+                "Zwischenphasen gehören dazu – hier habe ich bewusst Tempo rausgenommen und Richtung neu kalibriert.",
+              textTesla:
+                "Zwischenzeiten sind im Grunde Refactoring-Sprints fürs eigene Leben: Legacy-Code anschauen, Features streichen, Architektur neu denken.",
+              bullets: [
+                "2020–2023: Arbeitssuchend (Covid-Zeit, Neuorientierung)",
+                "2024: Teilnehmer bei Job-Trans-Fair, Wien",
+              ],
+            },
+            {
+              tag: "Kapitel 4 · Skills",
+              title: "Sprachen & Fähigkeiten",
+              textStory:
+                "Auf dem Weg sind einige nützliche Fähigkeiten dazugekommen.",
+              textCoffee:
+                "Am Ende sind es oft die einfachen Dinge, die viel bringen: Sprachen, Führerschein, mit Leuten reden können.",
+              textTesla:
+                "Skill-Stack: mehrere Sprachen, Führerschein, und die Fähigkeit, mit sehr unterschiedlichen Menschen auf Debug-Level zu sprechen.",
+              bullets: [
+                "Sprachen: Kroatisch (Muttersprache), Deutsch C1, Englisch C1",
+                "Spanisch B2, Portugiesisch B2, Französisch A2",
+                "Führerschein B",
+              ],
+            },
+            {
+              tag: "Kapitel 4 · Jetzt",
+              title: "Crypto Pain & AI Brain",
+              textStory:
+                "Nach turbulenten Jahren mit Krypto- und Startup-Projekten nutze ich die Learnings, um heute bewusster zu investieren – vor allem in sinnvolle Arbeit und gute Teams.",
+              textCoffee:
+                "Crypto hat mir gezeigt, wie schnell Versprechen groß werden – und genauso schnell platzen können. Heute setze ich meine Energie lieber in stabile Projekte und lerne dabei mit AI-Tools jeden Tag etwas Neues.",
+              textTesla:
+                "Crypto war im Rückblick ein High-Volatility-Sandbox-Environment: viele Hype-Signale, wenig verlässlicher Return. Ergebnis: weniger Blind-Trust in Buzzwords, mehr Fokus auf robuste Modelle und echte Use-Cases – aktuell vor allem mit AI-Tools und Prototyping.",
+              bullets: [
+                "Erfahrung mit volatilen Märkten und Projekten, in denen die versprochenen Millionen nie angekommen sind.",
+                "Neuorientierung nach Covid und bewusster Fokus auf langfristig sinnvolle Missionen.",
+                "Aktuell: Aufbau von Prototypen mit AI-Tools und Suche nach einem Setup, in dem diese Lernkurve wirklich Wert schafft.",
+              ],
+            },
+            {
+              tag: "Kapitel 4 · Motivation",
+              title: "Warum [Firmenname]?",
+              textStory:
+                "Warum [Firmenname]? Weil Ihre Herausforderungen perfekt zu meinen Lieblings-Skills passen – Analyse, Struktur, internationale Erfahrung und der Wille, Dinge wirklich besser zu machen.",
+              textCoffee:
+                "Warum ausgerechnet Sie? Weil ich das Gefühl habe, dass bei Ihnen nicht nur schöne Folien entstehen, sondern echte Arbeit mit Wirkung. Genau da will ich mitmachen – mit meinem Mix aus Zahlen, Praxis und ziemlich viel Lebenserfahrung.",
+              textTesla:
+                "Warum [Firmenname]? Weil Ihr Stack aus Themen, Werten und Projekten ziemlich nah an dem ist, was ich als „meaningful workload“ bezeichne: komplex genug, um spannend zu bleiben, nah genug an der Realität, um echten Impact zu haben. Ich bringe Audit-Denken, Systemblick und die Bereitschaft mit, mich tief in Ihre Codebase aus Prozessen einzugraben.",
+              bullets: [
+                "Sie arbeiten an Themen, die zählen – daran möchte ich mitarbeiten.",
+                "Sie schätzen Qualität, Zusammenarbeit und frische Ideen – genau so arbeite ich am liebsten.",
+                "P.S.: Diese Nachricht zerstört sich nicht wirklich selbst, aber Ihre Chance, mich kennenzulernen, könnte es tun.",
+              ],
+            },
+          ],
+        },
+        en: {
+          subtitleStory:
+            "Scroll down and read this CV like a classified mission file.",
+          subtitleCoffee:
+            "Coffee mode: read this CV like in your favourite café.",
+          subtitleTesla:
+            "Tesla mode: high-voltage career story – please fasten your seatbelt.",
+          missionIntro:
+            "Recruiter, your mission – should you choose to accept it – is to decode this CV before time runs out.",
+          label: "EN · playful career timeline",
+          tilesNote:
+            "Quick mode: 8 tiles with the key missions. For the full dossier, stay in story mode.",
+          tiles: [
+            {
+              icon: "🎓",
+              tag: "Level 1",
+              title: "Origin story & training",
+              lead:
+                "Case file: solid education for finance and audit missions.",
+              details: [
+                "Primary and secondary school in Croatia – basic skills.",
+                "Business studies in Vienna, focus on auditing & taxation.",
+                "ERASMUS semester in Budapest – international setup unlocked.",
+              ],
+            },
+            {
+              icon: "📚",
+              tag: "Level 2",
+              title: "Tax, AIESEC & side quests",
+              lead:
+                "Tax and accounting by day, student organisation by night – maximum multitasking.",
+              details: [
+                "Tax internship at KPMG in Vienna.",
+                "AIESEC project leader & board member, including CFO role.",
+                "Early responsibility for budgets, accounting and payments.",
+              ],
+            },
+            {
+              icon: "📊",
+              tag: "Level 3",
+              title: "Audit dungeon & EU bossfights",
+              lead:
+                "Big4 audits and EU missions with high relevance and responsibility.",
+              details: [
+                "PwC Vienna: legal audits under local GAAP and US-GAAP.",
+                "EUROSTAT Luxembourg: internal audits on controls, risks and processes.",
+                "Brussels seminars on internal audit, governance and control systems.",
+              ],
+            },
+            {
+              icon: "💼",
+              tag: "Level 4",
+              title: "Wealth, real estate & deals",
+              lead:
+                "Frontline with clients – real financial decisions with real people.",
+              details: [
+                "Financial advisor at SwissLife Select / AWD in Vienna.",
+                "Loans, insurance and long-term financial planning.",
+                "Real estate agent at RE/MAX HIT & EPI Immobilien Treuhand.",
+              ],
+            },
+            {
+              icon: "🏦",
+              tag: "Level 5",
+              title: "Bank by day, Capoeira by night",
+              lead:
+                "Banking in a suit, Capoeira in the roda – mind and body in balance.",
+              details: [
+                "UniCredit Bank Austria: managing international private customers.",
+                "Advising clients in several languages, building trust and structure.",
+                "Capoeira instructor: discipline, team building and resilience in real life.",
+              ],
+            },
+            {
+              icon: "🇪🇺",
+              tag: "Level 6",
+              title: "EU level: control & risk radar",
+              lead:
+                "Internal controls and risks under the lens of EU institutions.",
+              details: [
+                "Auditor at the European Commission, EUROSTAT, Luxembourg.",
+                "Member of a 5-person internal audit team.",
+                "Audits on compliance, operational and regulatory topics (e.g. agriculture, IT, document management).",
+              ],
+            },
+            {
+              icon: "🥕",
+              tag: "Level 7",
+              title: "Organic veggies & blockchain",
+              lead:
+                "From fields to blockchain – deliberately leaving the comfort zone.",
+              details: [
+                "Executive assistant at Bio Gemüse Posch (Austria/Spain).",
+                "Building an international network for organic certified products.",
+                "Startup investor, co-founder and advisor in the FinTech/blockchain space.",
+              ],
+            },
+            {
+              icon: "🧠",
+              tag: "Level 8",
+              title: "Crypto pain & AI brain",
+              lead:
+                "Learning from volatility, focusing on stable missions and new tools.",
+              details: [
+                "Experience with volatile markets and broken promises – now focusing on stability and value.",
+                "Career reset during Covid and participation at Job-Trans-Fair in Vienna.",
+                "Currently: AI tools, creative prototypes and the search for the next meaningful mission.",
+              ],
+            },
+          ],
+          projects: [
+            {
+              titleDe: "Le Chansonnier – global",
+              titleEn: "Le Chansonnier – global",
+              url: "https://le-chansonnier-global.vercel.app/",
+            },
+            {
+              titleDe: "Jam-Pa",
+              titleEn: "Jam-Pa",
+              url: "https://jam-pa.vercel.app/",
+            },
+            {
+              titleDe: "Brauhof Max",
+              titleEn: "Brauhof Max",
+              url: "https://brauhof-max.vercel.app/",
+            },
+            {
+              titleDe: "Onepager Nine",
+              titleEn: "Onepager Nine",
+              url: "https://onepager-nine.vercel.app/",
+            },
+            {
+              titleDe: "Coffeewerk",
+              titleEn: "Coffeewerk",
+              url: "https://coffeewerk.vercel.app/",
+            },
+          ],
+          steps: [
+            {
+              tag: "Chapter 1 · Origins",
+              title: "Case file: BREKALO",
+              textStory:
+                "I was born in Croatia – far away from Excel sheets and audits.",
+              textCoffee:
+                "Born in Croatia, long before Excel and PowerPoint entered the picture.",
+              textTesla:
+                "Initial commit: Croatia, 1977. No laptop, no Wi-Fi, just curiosity.",
+              bullets: [
+                "Name: Mag. Petar Brekalo",
+                "Born on 30.12.1977 in Croatia",
+                "Nationality: Croatian",
+              ],
+            },
+            // (für EN kannst du analog weitere Story/Coffee/Tesla-Texte ergänzen)
+          ],
+        },
+      };
+
+      const introScreen = document.getElementById("intro-screen");
+      const introCountdown = document.getElementById("intro-countdown");
+      const introButton = document.getElementById("intro-button");
+      const mainShell = document.getElementById("main-shell");
+
+      const timelineEl = document.getElementById("timeline");
+      const subtitleEl = document.getElementById("subtitle");
+      const missionIntroEl = document.getElementById("mission-intro");
+      const currentLabelEl = document.getElementById("current-label");
+      const langToggle = document.getElementById("lang-toggle");
+      const langFlag = document.getElementById("lang-flag");
+      const langToggleText = document.getElementById("lang-toggle-text");
+      const viewToggle = document.getElementById("view-toggle");
+      const viewToggleText = document.getElementById("view-toggle-text");
+      const modeToggle = document.getElementById("mode-toggle");
+      const modeToggleText = document.getElementById("mode-toggle-text");
+      const themeStoryBtn = document.getElementById("theme-story");
+      const themeCoffeeBtn = document.getElementById("theme-coffee");
+      const themeTeslaBtn = document.getElementById("theme-tesla");
+      const tilesView = document.getElementById("tiles-view");
+      const tilesGrid = document.getElementById("tiles-grid");
+      const tilesNote = document.getElementById("tiles-note");
+
+      const teslaLab = document.getElementById("tesla-lab");
+      const teslaLabGrid = document.getElementById("tesla-lab-grid");
+      const teslaLabNote = document.getElementById("tesla-lab-note");
+
+      const missionTextDe = document.getElementById("mission-text-de");
+      const missionTextEn = document.getElementById("mission-text-en");
+      const countdownDe = document.getElementById("countdown-de");
+      const countdownEn = document.getElementById("countdown-en");
+
+      let currentLang = "de";
+      let currentMode = "timeline";
+      let currentTheme = "story";
+
+      function getStepText(step) {
+        if (currentTheme === "coffee")
+          return step.textCoffee || step.textStory || step.text;
+        if (currentTheme === "tesla")
+          return step.textTesla || step.textStory || step.text;
+        return step.textStory || step.text;
+      }
+
+      function updateSubtitle() {
+        const langData = content[currentLang];
+        if (currentTheme === "story") {
+          subtitleEl.textContent = langData.subtitleStory;
+        } else if (currentTheme === "coffee") {
+          subtitleEl.textContent = langData.subtitleCoffee;
+        } else if (currentTheme === "tesla") {
+          subtitleEl.textContent = langData.subtitleTesla;
+        }
+        missionIntroEl.textContent = langData.missionIntro;
+      }
+
+      function setTheme(theme) {
+        currentTheme = theme;
+        document.body.classList.remove("theme-story", "theme-coffee", "theme-tesla");
+        document.body.classList.add(`theme-${theme}`);
+
+        themeStoryBtn.classList.remove("active");
+        themeCoffeeBtn.classList.remove("active");
+        themeTeslaBtn.classList.remove("active");
+
+        if (theme === "story") themeStoryBtn.classList.add("active");
+        if (theme === "coffee") themeCoffeeBtn.classList.add("active");
+        if (theme === "tesla") themeTeslaBtn.classList.add("active");
+
+        updateSubtitle();
+        renderTeslaLab();
+        renderSteps();
+      }
+
+      function renderSteps() {
+        const langData = content[currentLang];
+        currentLabelEl.textContent = langData.label;
+        updateSubtitle();
+
+        timelineEl.innerHTML = "";
+        langData.steps.forEach((step) => {
+          const stepEl = document.createElement("article");
+          stepEl.className = "story-step";
+          stepEl.innerHTML = `
+            <div class="step-dot"></div>
+            <div class="step-card">
+              <div class="step-tag">${step.tag}</div>
+              <h2 class="step-title">${step.title}</h2>
+              <p class="step-text">${getStepText(step)}</p>
+              <ul class="bullets">
+                ${step.bullets
+                  .map(
+                    (b, i) =>
+                      `<li style="--i:${i + 1}">${b}</li>`
+                  )
+                  .join("")}
+              </ul>
+            </div>
+          `;
+          timelineEl.appendChild(stepEl);
+        });
+
+        setupObserver();
+      }
+
+      function attachTileHandlers() {
+        const tileCards = document.querySelectorAll(".tile-card");
+        tileCards.forEach((card, index) => {
+          if (index === 0) card.classList.add("open");
+          card.addEventListener("click", () => {
+            card.classList.toggle("open");
+          });
+          card.addEventListener("mouseenter", () => {
+            card.classList.add("open");
+          });
+          card.addEventListener("mouseleave", () => {
+            card.classList.remove("open");
+          });
+        });
+      }
+
+      function renderTiles() {
+        const langData = content[currentLang];
+        tilesNote.textContent = langData.tilesNote;
+        tilesGrid.innerHTML = "";
+        langData.tiles.forEach((tile) => {
+          const tileEl = document.createElement("article");
+          tileEl.className = "tile-card";
+          tileEl.innerHTML = `
+            <div class="tile-header">
+              <div class="tile-icon">${tile.icon}</div>
+              <div>
+                <div class="tile-title">${tile.title}</div>
+                <div class="tile-tag">${tile.tag}</div>
+              </div>
+            </div>
+            <p class="tile-lead">${tile.lead}</p>
+            <div class="tile-details">
+              <ul class="tile-bullets">
+                ${tile.details.map((b) => `<li>${b}</li>`).join("")}
+              </ul>
+            </div>
+          `;
+          tilesGrid.appendChild(tileEl);
+        });
+        attachTileHandlers();
+      }
+
+      function renderTeslaLab() {
+        const langData = content[currentLang];
+        const projects = langData.projects || [];
+        teslaLabGrid.innerHTML = "";
+        projects.forEach((p) => {
+          const title = currentLang === "de" ? p.titleDe : p.titleEn;
+          const card = document.createElement("article");
+          card.className = "tile-card";
+          card.innerHTML = `
+            <div class="tile-header">
+              <div class="tile-icon">🔬</div>
+              <div>
+                <div class="tile-title">${title}</div>
+                <div class="tile-tag">Vercel playground</div>
+              </div>
+            </div>
+            <a class="project-link" href="${p.url}" target="_blank" rel="noopener noreferrer">
+              ${p.url}
+            </a>
+          `;
+          teslaLabGrid.appendChild(card);
+        });
+        teslaLabNote.textContent =
+          currentLang === "de"
+            ? "Tesla Mode: Laborprotokoll – eine Auswahl meiner Web-Experimente."
+            : "Tesla mode: lab log – a selection of my web experiments.";
+        teslaLab.style.display = currentTheme === "tesla" ? "block" : "none";
+      }
+
+      function setupObserver() {
+        const steps = document.querySelectorAll(".story-step");
+        const observer = new IntersectionObserver(
+          (entries) => {
+            entries.forEach((entry) => {
+              if (entry.isIntersecting) {
+                entry.target.classList.add("show");
+              }
+            });
+          },
+          { threshold: 0.25 }
+        );
+        steps.forEach((s) => observer.observe(s));
+      }
+
+      langToggle.addEventListener("click", () => {
+        currentLang = currentLang === "de" ? "en" : "de";
+        langToggle.classList.add("active");
+        if (currentLang === "de") {
+          missionTextDe.style.display = "inline";
+          missionTextEn.style.display = "none";
+          langToggleText.textContent = "Deutsch";
+          langFlag.textContent = "🇩🇪";
+        } else {
+          missionTextDe.style.display = "none";
+          missionTextEn.style.display = "inline";
+          langToggleText.textContent = "English";
+          langFlag.textContent = "🇬🇧";
+        }
+        renderSteps();
+        renderTiles();
+        renderTeslaLab();
+      });
+
+      viewToggle.addEventListener("click", () => {
+        const body = document.body;
+        if (body.classList.contains("view-desktop")) {
+          body.classList.remove("view-desktop");
+          body.classList.add("view-mobile");
+          viewToggleText.textContent = "Mobile view";
+          viewToggle.classList.add("active");
+        } else {
+          body.classList.remove("view-mobile");
+          body.classList.add("view-desktop");
+          viewToggleText.textContent = "Desktop view";
+          viewToggle.classList.remove("active");
+        }
+      });
+
+      modeToggle.addEventListener("click", () => {
+        if (currentMode === "timeline") {
+          currentMode = "tiles";
+          timelineEl.style.display = "none";
+          tilesView.style.display = "block";
+          modeToggleText.textContent =
+            currentLang === "de" ? "Storymodus" : "Story mode";
+          modeToggle.classList.add("active");
+        } else {
+          currentMode = "timeline";
+          timelineEl.style.display = "block";
+          tilesView.style.display = "none";
+          modeToggleText.textContent =
+            currentLang === "de" ? "Kurzmodus" : "Quick tiles";
+          modeToggle.classList.remove("active");
+        }
+      });
+
+      themeStoryBtn.addEventListener("click", () => setTheme("story"));
+      themeCoffeeBtn.addEventListener("click", () => setTheme("coffee"));
+      themeTeslaBtn.addEventListener("click", () => setTheme("tesla"));
+
+      const deadline = new Date();
+      deadline.setDate(deadline.getDate() + 3);
+
+      function formatCountdown(distance) {
+        const days = Math.max(0, Math.floor(distance / (1000 * 60 * 60 * 24)));
+        const hours = Math.max(
+          0,
+          Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))
+        );
+        const minutes = Math.max(
+          0,
+          Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60))
+        );
+        return { days, hours, minutes };
+      }
+
+      function updateCountdown() {
+        const now = new Date().getTime();
+        const distance = deadline.getTime() - now;
+        const { days, hours, minutes } = formatCountdown(distance);
+
+        if (introCountdown) {
+          introCountdown.textContent =
+            days + " Tage, " + hours + " Stunden, " + minutes + " Minuten";
+        }
+
+        if (distance > 0) {
+          const deText = `${days} Tage, ${hours} Stunden, ${minutes} Minuten`;
+          const enText = `${days} days, ${hours} hours, ${minutes} minutes`;
+          if (countdownDe) countdownDe.textContent = deText;
+          if (countdownEn) countdownEn.textContent = enText;
+        } else {
+          if (countdownDe)
+            countdownDe.textContent =
+              "Mission abgelaufen – Seite im Selbstzerstörungsmodus.";
+          if (countdownEn)
+            countdownEn.textContent =
+              "Mission expired – page in self-destruct mode.";
+          document.body.style.background = "#ffffff";
+          document.body.innerHTML = "";
+          clearInterval(timerInterval);
+        }
+      }
+
+      const timerInterval = setInterval(updateCountdown, 60 * 1000);
+      updateCountdown();
+
+      function hideIntroAndScroll() {
+        introScreen.classList.add("hidden");
+        setTimeout(() => {
+          introScreen.style.display = "none";
+          mainShell.scrollIntoView({ behavior: "smooth" });
+        }, 500);
+      }
+
+      setTimeout(hideIntroAndScroll, 3000);
+      introButton.addEventListener("click", hideIntroAndScroll);
+      introScreen.addEventListener("click", (e) => {
+        if (e.target.id === "intro-button") return;
+        hideIntroAndScroll();
+      });
+
+      setTheme("story");
+      renderSteps();
+      renderTiles();
+      renderTeslaLab();
+    </script>
+  </body>
+</html>
