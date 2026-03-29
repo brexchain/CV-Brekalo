@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="de">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Petar Brekalo – Interactive Story CV</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+      :root {
+        --bg: #050816;
+        --card-bg: rgba(30, 41, 59, 0.8);
+        --accent: #38bdf8;
+        --accent-hover: #0ea5e9;
+        --text: #f8fafc;
+        --muted: #94a3b8;
+        --glass-border: rgba(255, 255, 255, 0.1);
+        --danger: #ef4444;
+      }
+
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+
+      body {
+        font-family: system-ui, -apple-system, sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        line-height: 1.6;
+        overflow-x: hidden;
+      }
+
+      /* HINTERGRUND-BILD & EFFEKTE */
+      .bg-wrapper {
+        position: fixed;
+        top: 0; left: 0; width: 100%; height: 100%;
+        z-index: -2;
+        /* HINWEIS: Hier dein Bild-Dateinamen einsetzen */
+        background: linear-gradient(rgba(5, 8, 22, 0.85), rgba(5, 8, 22, 0.95)), 
+                    url('dein-bild.jpg') no-repeat center center;
+        background-size: cover;
+      }
+
+      .glass-decoration {
+        position: fixed;
+        z-index: -1;
+        background: rgba(255, 255, 255, 0.03);
+        backdrop-filter: blur(10px);
+        border: 1px solid var(--glass-border);
+        border-radius: 12px;
+        pointer-events: none;
+      }
+
+      .chart-1 { width: 140px; height: 90px; top: 15%; right: -20px; transform: rotate(-12deg); }
+      .table-1 { width: 180px; height: 130px; bottom: 15%; left: -30px; transform: rotate(8deg); }
+
+      .scroll-progress {
+        position: fixed;
+        top: 0; left: 0; height: 6px;
+        background: var(--accent);
+        width: 0%; z-index: 100;
+        box-shadow: 0 0 15px var(--accent);
+      }
+
+      header { text-align: center; padding: 60px 20px; }
+      h1 { font-size: 2.5rem; background: linear-gradient(to right, #38bdf8, #818cf8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+
+      .timeline { max-width: 550px; margin: 0 auto; position: relative; padding-left: 40px; padding-right: 15px; }
+      .timeline::before { content: ''; position: absolute; left: 10px; top: 0; bottom: 0; width: 2px; background: linear-gradient(transparent, var(--accent), transparent); }
+
+      .step { position: relative; margin-bottom: 40px; opacity: 0; transform: translateY(30px); transition: all 0.7s ease-out; }
+      .step.show { opacity: 1; transform: translateY(0); }
+
+      .step-icon {
+        position: absolute; left: -42px; top: 0; width: 34px; height: 34px;
+        background: var(--bg); border: 2px solid var(--accent);
+        border-radius: 50%; display: flex; align-items: center; justify-content: center; z-index: 2;
+        box-shadow: 0 0 10px var(--accent);
+      }
+
+      .step-card {
+        background: var(--card-bg); backdrop-filter: blur(15px);
+        padding: 25px; border-radius: 20px; border: 1px solid var(--glass-border);
+        cursor: pointer; transition: 0.3s;
+      }
+      .step-card:hover { border-color: var(--accent); }
+
+      .level-tag { font-size: 0.75rem; text-transform: uppercase; color: var(--accent); font-weight: 800; margin-bottom: 5px; }
+      .step-title { font-size: 1.4rem; margin-bottom: 5px; }
+      .step-text { color: #cbd5e1; font-size: 0.95rem; }
+
+      /* Aufklapp-Details */
+      .details-content { max-height: 0; opacity: 0; overflow: hidden; transition: all 0.4s ease; }
+      .step-card.open .details-content { max-height: 1200px; opacity: 1; margin-top: 20px; padding-top: 15px; border-top: 1px solid var(--glass-border); }
+
+      .facts { list-style: none; }
+      .facts li { font-size: 0.9rem; color: var(--muted); margin-bottom: 12px; display: flex; gap: 10px; }
+      .facts li::before { content: "⚡"; color: var(--accent); font-size: 0.8rem; }
+      .facts a { color: var(--accent); text-decoration: none; font-weight: bold; border-bottom: 1px dashed var(--accent); }
+
+      /* BUTTONS & EXTERNAL LINKS */
+      .button-area { max-width: 550px; margin: 40px auto; padding: 0 20px; text-align: center; }
+      
+      .btn-web {
+        display: block; width: 100%; padding: 18px; 
+        background: var(--accent); color: var(--bg);
+        text-decoration: none; font-weight: 800; border-radius: 16px;
+        font-size: 1.1rem; transition: transform 0.2s, box-shadow 0.2s;
+        box-shadow: 0 4px 20px rgba(56, 189, 248, 0.3);
+      }
+      .btn-web:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(56, 189, 248, 0.5); }
+
+      .footer-box {
+        max-width: 550px; margin: 20px auto 100px; padding: 30px;
+        background: rgba(239, 68, 68, 0.05); border: 2px dashed var(--danger);
+        border-radius: 24px; text-align: center;
+      }
+      .btn-pdf { display: inline-block; padding: 12px 24px; color: var(--danger); border: 2px solid var(--danger); text-decoration: none; border-radius: 12px; font-weight: bold; font-size: 0.9rem; }
+      .btn-pdf:hover { background: var(--danger); color: white; }
+
+    </style>
+  </head>
+  <body>
+    <div class="bg-wrapper"></div>
+    <div class="glass-decoration chart-1"></div>
+    <div class="glass-decoration table-1"></div>
+    
+    <div class="scroll-progress" id="progress"></div>
+
+    <header>
+      <h1>Petar Brekalo</h1>
+      <p style="color:var(--muted)">Audit-Denken & Web-Experimente. Ein interaktiver Speedrun.</p>
+    </header>
+
+    <main class="timeline">
+      
+      <article class="step">
+        <div class="step-icon">👶</div>
+        <div class="step-card">
+          <div class="level-tag">Level 1: Origin Story</div>
+          <h2 class="step-title">Gespawnt in Kroatien</h2>
+          <p class="step-text">Frühe Neugier auf komplexe Abläufe und Systeme.</p>
+          <div class="details-content">
+            <ul class="facts">
+              <li>Geboren 1977 – ein Vintage-Jahrgang mit moderner Hardware.</li>
+              <li>Gymnasium abgeschlossen: Fokus auf analytisches Denken.</li>
+              <li>Sprachen: Kroatisch (Nativ), Deutsch (C1), Englisch (C1).</li>
+            </ul>
+          </div>
+        </div>
+      </article>
+
+      <article class="step">
+        <div class="step-icon">🎓</div>
+        <div class="step-card">
+          <div class="level-tag">Level 2: The WU Grinds</div>
+          <h2 class="step-title">Zahlen & Excel-Mastery</h2>
+          <p class="step-text">Wirtschaftsuniversität Wien. Revision und Steuerlehre als Kern-Skills.</p>
+          <div class="details-content">
+            <ul class="facts">
+              <li>WU Wien: Fachrichtung Unternehmensrechnung & Steuerlehre.</li>
+              <li>AIESEC Wien & International: CFO-Posten für Budget, Zahlungsverkehr und Jahresabschluss (100 Mitglieder).</li>
+              <li>Erasmus Budapest: Public Administration & Economics.</li>
+              <li>Athen Side-Quest: Trading-Abteilung Commercial Bank of Greece (Anleihen & Zinsen).</li>
+            </ul>
+          </div>
+        </div>
+      </article>
+
+      <article class="step">
+        <div class="step-icon">🕵️‍♂️</div>
+        <div class="step-card">
+          <div class="level-tag">Level 3: Professional Audit</div>
+          <h2 class="step-title">PwC & EU-Kommission</h2>
+          <p class="step-text">Tiefes Graben in Bilanzen, Compliance und IT-Strukturen.</p>
+          <div class="details-content">
+            <ul class="facts">
+              <li>PwC: Externe Legal Audits nach UGB und US-GAAP für Industrie-Giganten.</li>
+              <li>EU-Kommission (Luxemburg/Brüssel): Interne Audits zu Compliance, IT-Archivierung und Agrikultur.</li>
+              <li>UniCredit: Internationale Kundenbetreuung – Finanzen auf globalem Level.</li>
+              <li>Staatlich geprüfter Vermögensberater: Das Fundament für Risiko-Management.</li>
+            </ul>
+          </div>
+        </div>
+      </article>
+
+      <article class="step">
+        <div class="step-icon">🎢</div>
+        <div class="step-card">
+          <div class="level-tag">Level 4: Real-World Experience</div>
+          <h2 class="step-title">Logistik & Blockchain</h2>
+          <p class="step-text">Operative Exzellenz trifft auf die Zukunft der Finanzen.</p>
+          <div class="details-content">
+            <ul class="facts">
+              <li>Bio Gemüse Posch: GF-Assistenz für Logistik, Behörden und EU-Zertifizierung (AT/ES).</li>
+              <li>Startup-Investor & Berater: FinTech, Blockchain und AI Vibe Coding.</li>
+              <li>Compliance-Fokus: Fristen und Termine immer im Blick (Audit-Brain).</li>
+            </ul>
+          </div>
+        </div>
+      </article>
+
+      <article class="step">
+        <div class="step-icon">🎯</div>
+        <div class="step-card">
+          <div class="level-tag">Level 5: Motivation</div>
+          <h2 class="step-title">Warum Ihr Team?</h2>
+          <p class="step-text">Meaningful Workload statt 08/15-Aufgaben.</p>
+          <div class="details-content">
+            <ul class="facts">
+              <li>Systemblick: Ich grabe mich tief in Ihre Prozess-Codebase ein.</li>
+              <li>Genauigkeit & Diskretion: Werte aus dem Audit, angewendet auf moderne Workflows.</li>
+              <li>Vibe: Qualität, Zusammenarbeit und frische Ideen sind mein Standard.</li>
+            </ul>
+          </div>
+        </div>
+      </article>
+
+      <article class="step">
+        <div class="step-icon">🔬</div>
+        <div class="step-card">
+          <div class="level-tag">Level 6: Tesla Mode</div>
+          <h2 class="step-title">Web-Experimente</h2>
+          <p class="step-text">Echte Projekte, live deployt auf Vercel.</p>
+          <div class="details-content">
+            <ul class="facts">
+              <li><a href="https://le-chansonnier-global.vercel.app/">Le Chansonnier</a> – Global Branding Playground.</li> 
+             <li>  <a href="https://strom-re.vercel.app/">StromRe</a></li>
+              
+              <li><a href="https://coffeewerk.vercel.app/">Coffeewerk</a> – High Performance One-Pager.</li> <li><a href="https://brauhof-max.vercel.app/">Brauhof Max</a> – Gastro-UX im Fokus.</li>  
+              
+              <li><a href="https://jam-pa.vercel.app/">Jam-Pa</a> & <a href="https://onepager-nine.vercel.app/">Onepager Nine</a>.</li>
+            </ul>
+          </div>
+        </div>
+      </article>
+
+    </main>
+
+    <div class="button-area">
+      <a href="webCV_Brekalo.htm" class="btn-web">Zur vollen interaktiven Web-Version</a>
+    </div>
+
+    <section class="footer-box">
+      <h3 style="color:var(--danger)">⚠️ Analoge Sicherheitszone</h3>
+      <p style="color:var(--muted)">Du stehst auf Tabellen, statische Texte und Design aus der Ära der Aktenordner? Ich richte nicht. Hier ist das „langweilige“ PDF:</p>
+      <a href="LL_BREKALO Mag.pdf" class="btn-pdf">PDF im gleichen Fenster öffnen</a>
+    </section>
+
+    <script>
+      // Scroll Progress
+      window.addEventListener('scroll', () => {
+        const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+        document.getElementById('progress').style.width = (window.scrollY / docHeight) * 100 + '%';
+      });
+
+      // Einblenden der Kacheln
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('show'); });
+      }, { threshold: 0.1 });
+
+      document.querySelectorAll('.step').forEach(s => observer.observe(s));
+
+      // Klick-Logik für Details
+      document.querySelectorAll('.step-card').forEach(c => {
+        c.addEventListener('click', () => c.classList.toggle('open'));
+      });
+    </script>
+  </body>
+</html>
